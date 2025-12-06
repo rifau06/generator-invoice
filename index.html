@@ -412,38 +412,40 @@
                                                         <p className="text-xs text-gray-600 mb-2 font-medium">Detail per Size:</p>
                                                         <div className="space-y-2">
                                                             {item.details.map((detail, detailIndex) => (
-                                                                <div key={detailIndex} className="flex flex-wrap sm:flex-nowrap gap-2 items-center bg-gray-50 p-2 rounded">
-                                                                    <div className="flex items-center gap-1 flex-1 min-w-[140px]">
-                                                                        <span className="text-xs text-gray-500 whitespace-nowrap">Size:</span>
-                                                                        <input
-                                                                            type="text"
-                                                                            placeholder="39"
-                                                                            value={detail.size}
-                                                                            onChange={(e) => updateDetail(itemIndex, detailIndex, 'size', e.target.value)}
-                                                                            className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                                        />
-                                                                    </div>
-                                                                    <div className="flex items-center gap-1 flex-1 min-w-[140px]">
-                                                                        <span className="text-xs text-gray-500 whitespace-nowrap">Qty:</span>
-                                                                        <input
-                                                                            type="number"
-                                                                            placeholder="10"
-                                                                            value={detail.qty}
-                                                                            onChange={(e) => updateDetail(itemIndex, detailIndex, 'qty', e.target.value)}
-                                                                            className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                                        />
+                                                                <div key={detailIndex} className="bg-gray-50 p-3 rounded">
+                                                                    <div className="grid grid-cols-2 gap-2 mb-2">
+                                                                        <div>
+                                                                            <label className="text-xs text-gray-500 block mb-1">Size:</label>
+                                                                            <input
+                                                                                type="text"
+                                                                                placeholder="39"
+                                                                                value={detail.size}
+                                                                                onChange={(e) => updateDetail(itemIndex, detailIndex, 'size', e.target.value)}
+                                                                                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                            />
+                                                                        </div>
+                                                                        <div>
+                                                                            <label className="text-xs text-gray-500 block mb-1">Qty:</label>
+                                                                            <input
+                                                                                type="number"
+                                                                                placeholder="10"
+                                                                                value={detail.qty}
+                                                                                onChange={(e) => updateDetail(itemIndex, detailIndex, 'qty', e.target.value)}
+                                                                                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                            />
+                                                                        </div>
                                                                     </div>
                                                                     <button
                                                                         onClick={() => removeDetail(itemIndex, detailIndex)}
-                                                                        className="px-3 py-1 text-xs bg-red-100 text-red-600 rounded hover:bg-red-200 whitespace-nowrap"
+                                                                        className="w-full px-3 py-1.5 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200"
                                                                     >
-                                                                        ✕ Hapus
+                                                                        ✕ Hapus Size
                                                                     </button>
                                                                 </div>
                                                             ))}
                                                             <button
                                                                 onClick={() => addDetail(itemIndex)}
-                                                                className="text-sm px-3 py-2 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 w-full sm:w-auto"
+                                                                className="text-sm px-3 py-2 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 w-full"
                                                             >
                                                                 + Tambah Size
                                                             </button>
