@@ -58,14 +58,35 @@
             });
 
             const [items, setItems] = useState([
-                { description: 'Jasa Konsultasi', quantity: 1, unit: 'Paket', price: 5000000 },
-                { description: 'Biaya Layanan', quantity: 2, unit: 'Bulan', price: 2500000 }
+                { 
+                    description: 'Jasa Konsultasi', 
+                    quantity: 1, 
+                    unit: 'Paket', 
+                    price: 5000000,
+                    hasDetails: false,
+                    details: []
+                },
+                { 
+                    description: 'Model Pertama - Bahan Suede', 
+                    quantity: 60, 
+                    unit: 'Pasang', 
+                    price: 250000,
+                    hasDetails: true,
+                    details: [
+                        { size: '39', qty: 10 },
+                        { size: '40', qty: 15 },
+                        { size: '41', qty: 15 },
+                        { size: '42', qty: 10 },
+                        { size: '43', qty: 10 }
+                    ]
+                }
             ]);
 
             const [tax, setTax] = useState(11); // PPN 11%
             const [showDiscount, setShowDiscount] = useState(false);
             const [showTax, setShowTax] = useState(true);
             const [showUnit, setShowUnit] = useState(true);
+            const [showSizeDetails, setShowSizeDetails] = useState(true);
 
             const updateInvoice = (field, value) => {
                 setInvoice({ ...invoice, [field]: value });
@@ -82,11 +103,49 @@
             };
 
             const addItem = () => {
-                setItems([...items, { description: '', quantity: 1, unit: 'Pcs', price: 0 }]);
+                setItems([...items, { 
+                    description: '', 
+                    quantity: 1, 
+                    unit: 'Pcs', 
+                    price: 0,
+                    hasDetails: false,
+                    details: []
+                }]);
             };
 
             const removeItem = (index) => {
                 setItems(items.filter((_, i) => i !== index));
+            };
+
+            const toggleItemDetails = (index) => {
+                const newItems = [...items];
+                newItems[index].hasDetails = !newItems[index].hasDetails;
+                if (newItems[index].hasDetails && newItems[index].details.length === 0) {
+                    newItems[index].details = [{ size: '', qty: 0 }];
+                }
+                setItems(newItems);
+            };
+
+            const addDetail = (itemIndex) => {
+                const newItems = [...items];
+                newItems[itemIndex].details.push({ size: '', qty: 0 });
+                setItems(newItems);
+            };
+
+            const removeDetail = (itemIndex, detailIndex) => {
+                const newItems = [...items];
+                newItems[itemIndex].details = newItems[itemIndex].details.filter((_, i) => i !== detailIndex);
+                setItems(newItems);
+            };
+
+            const updateDetail = (itemIndex, detailIndex, field, value) => {
+                const newItems = [...items];
+                if (field === 'size') {
+                    newItems[itemIndex].details[detailIndex][field] = value;
+                } else {
+                    newItems[itemIndex].details[detailIndex][field] = parseFloat(value) || 0;
+                }
+                setItems(newItems);
             };
 
             const calculateSubtotal = () => {
@@ -143,7 +202,7 @@
                             </button>
                             
                             {/* Toggle Options */}
-                            <div className="flex gap-4 ml-auto items-center">
+                            <div className="flex gap-4 ml-auto items-center flex-wrap">
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="checkbox"
@@ -151,7 +210,7 @@
                                         onChange={(e) => setShowDiscount(e.target.checked)}
                                         className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                                     />
-                                    <span className="text-gray-700">Tampilkan diskon</span>
+                                    <span className="text-gray-700 text-sm">Tampilkan diskon</span>
                                 </label>
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
@@ -160,7 +219,7 @@
                                         onChange={(e) => setShowTax(e.target.checked)}
                                         className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                                     />
-                                    <span className="text-gray-700">Tampilkan pajak</span>
+                                    <span className="text-gray-700 text-sm">Tampilkan pajak</span>
                                 </label>
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
@@ -169,7 +228,16 @@
                                         onChange={(e) => setShowUnit(e.target.checked)}
                                         className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                                     />
-                                    <span className="text-gray-700">Tampilkan satuan</span>
+                                    <span className="text-gray-700 text-sm">Tampilkan satuan</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={showSizeDetails}
+                                        onChange={(e) => setShowSizeDetails(e.target.checked)}
+                                        className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    <span className="text-gray-700 text-sm">Tampilkan detail size</span>
                                 </label>
                             </div>
                         </div>
@@ -282,45 +350,96 @@
                                 {/* Items */}
                                 <div className="bg-white p-6 rounded-lg invoice-shadow">
                                     <h2 className="text-xl font-semibold mb-4 text-gray-800">Item</h2>
-                                    <div className="space-y-3">
-                                        {items.map((item, index) => (
-                                            <div key={index} className="flex gap-2 items-start">
-                                                <input
-                                                    type="text"
-                                                    placeholder="Deskripsi"
-                                                    value={item.description}
-                                                    onChange={(e) => updateItem(index, 'description', e.target.value)}
-                                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                />
-                                                <input
-                                                    type="number"
-                                                    placeholder="Qty"
-                                                    value={item.quantity}
-                                                    onChange={(e) => updateItem(index, 'quantity', e.target.value)}
-                                                    className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                />
-                                                {showUnit && (
+                                    <div className="space-y-4">
+                                        {items.map((item, itemIndex) => (
+                                            <div key={itemIndex} className="border border-gray-200 rounded-lg p-4">
+                                                <div className="flex gap-2 items-start mb-2">
                                                     <input
                                                         type="text"
-                                                        placeholder="Satuan"
-                                                        value={item.unit}
-                                                        onChange={(e) => updateItem(index, 'unit', e.target.value)}
-                                                        className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                        placeholder="Deskripsi"
+                                                        value={item.description}
+                                                        onChange={(e) => updateItem(itemIndex, 'description', e.target.value)}
+                                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                     />
-                                                )}
-                                                <input
-                                                    type="number"
-                                                    placeholder="Harga"
-                                                    value={item.price}
-                                                    onChange={(e) => updateItem(index, 'price', e.target.value)}
-                                                    className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                />
+                                                    <input
+                                                        type="number"
+                                                        placeholder="Qty"
+                                                        value={item.quantity}
+                                                        onChange={(e) => updateItem(itemIndex, 'quantity', e.target.value)}
+                                                        className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    />
+                                                    {showUnit && (
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Satuan"
+                                                            value={item.unit}
+                                                            onChange={(e) => updateItem(itemIndex, 'unit', e.target.value)}
+                                                            className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                        />
+                                                    )}
+                                                    <input
+                                                        type="number"
+                                                        placeholder="Harga"
+                                                        value={item.price}
+                                                        onChange={(e) => updateItem(itemIndex, 'price', e.target.value)}
+                                                        className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    />
+                                                    <button
+                                                        onClick={() => removeItem(itemIndex)}
+                                                        className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 flex-shrink-0"
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                                
+                                                {/* Toggle Details Button */}
                                                 <button
-                                                    onClick={() => removeItem(index)}
-                                                    className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                                                    onClick={() => toggleItemDetails(itemIndex)}
+                                                    className={`text-sm px-3 py-1 rounded ${item.hasDetails ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'} hover:bg-blue-200 transition-colors`}
                                                 >
-                                                    ✕
+                                                    {item.hasDetails ? '📋 Detail Size Aktif' : '➕ Tambah Detail Size'}
                                                 </button>
+                                                
+                                                {/* Details Section */}
+                                                {item.hasDetails && (
+                                                    <div className="mt-3 pl-4 border-l-2 border-blue-300">
+                                                        <p className="text-xs text-gray-600 mb-2 font-medium">Detail per Size:</p>
+                                                        <div className="space-y-2">
+                                                            {item.details.map((detail, detailIndex) => (
+                                                                <div key={detailIndex} className="flex gap-2 items-center">
+                                                                    <span className="text-xs text-gray-500">Size:</span>
+                                                                    <input
+                                                                        type="text"
+                                                                        placeholder="39"
+                                                                        value={detail.size}
+                                                                        onChange={(e) => updateDetail(itemIndex, detailIndex, 'size', e.target.value)}
+                                                                        className="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                    />
+                                                                    <span className="text-xs text-gray-500">Qty:</span>
+                                                                    <input
+                                                                        type="number"
+                                                                        placeholder="10"
+                                                                        value={detail.qty}
+                                                                        onChange={(e) => updateDetail(itemIndex, detailIndex, 'qty', e.target.value)}
+                                                                        className="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                    />
+                                                                    <button
+                                                                        onClick={() => removeDetail(itemIndex, detailIndex)}
+                                                                        className="px-2 py-1 text-xs bg-red-100 text-red-600 rounded hover:bg-red-200"
+                                                                    >
+                                                                        ✕
+                                                                    </button>
+                                                                </div>
+                                                            ))}
+                                                            <button
+                                                                onClick={() => addDetail(itemIndex)}
+                                                                className="text-xs px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
+                                                            >
+                                                                + Tambah Size
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         ))}
                                     </div>
@@ -441,13 +560,26 @@
                                             </thead>
                                             <tbody>
                                                 {items.map((item, index) => (
-                                                    <tr key={index} className="border-b border-gray-200">
-                                                        <td className="py-3 text-gray-800">{item.description}</td>
-                                                        <td className="py-3 text-center text-gray-800">{item.quantity}</td>
-                                                        {showUnit && <td className="py-3 text-center text-gray-800">{item.unit}</td>}
-                                                        <td className="py-3 text-right text-gray-800">{formatCurrency(item.price)}</td>
-                                                        <td className="py-3 text-right text-gray-800 font-semibold">{formatCurrency(item.quantity * item.price)}</td>
-                                                    </tr>
+                                                    <React.Fragment key={index}>
+                                                        <tr className="border-b border-gray-200">
+                                                            <td className="py-3 text-gray-800">
+                                                                {item.description}
+                                                                {item.hasDetails && showSizeDetails && (
+                                                                    <div className="text-xs text-gray-500 mt-1 space-y-0.5">
+                                                                        {item.details.map((detail, dIdx) => (
+                                                                            <div key={dIdx}>
+                                                                                • Size {detail.size}: {detail.qty} {item.unit}
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                            </td>
+                                                            <td className="py-3 text-center text-gray-800">{item.quantity}</td>
+                                                            {showUnit && <td className="py-3 text-center text-gray-800">{item.unit}</td>}
+                                                            <td className="py-3 text-right text-gray-800">{formatCurrency(item.price)}</td>
+                                                            <td className="py-3 text-right text-gray-800 font-semibold">{formatCurrency(item.quantity * item.price)}</td>
+                                                        </tr>
+                                                    </React.Fragment>
                                                 ))}
                                             </tbody>
                                         </table>
