@@ -187,58 +187,81 @@
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="no-print mb-6 flex flex-wrap gap-3">
-                            <button
-                                onClick={handlePrint}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-                            >
-                                🖨️ Print Invoice
-                            </button>
-                            <button
-                                onClick={handleDownloadPDF}
-                                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-                            >
-                                📄 Download PDF
-                            </button>
+                        <div className="no-print mb-6">
+                            {/* Main Action Buttons */}
+                            <div className="flex flex-wrap gap-3 mb-4">
+                                <button
+                                    onClick={handlePrint}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-2 shadow-sm"
+                                >
+                                    <span>🖨️</span>
+                                    <span>Print Invoice</span>
+                                </button>
+                                <button
+                                    onClick={handleDownloadPDF}
+                                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-2 shadow-sm"
+                                >
+                                    <span>📄</span>
+                                    <span>Download PDF</span>
+                                </button>
+                            </div>
                             
                             {/* Toggle Options */}
-                            <div className="flex gap-4 ml-auto items-center flex-wrap">
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={showDiscount}
-                                        onChange={(e) => setShowDiscount(e.target.checked)}
-                                        className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                    />
-                                    <span className="text-gray-700 text-sm">Tampilkan diskon</span>
-                                </label>
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={showTax}
-                                        onChange={(e) => setShowTax(e.target.checked)}
-                                        className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                    />
-                                    <span className="text-gray-700 text-sm">Tampilkan pajak</span>
-                                </label>
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={showUnit}
-                                        onChange={(e) => setShowUnit(e.target.checked)}
-                                        className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                    />
-                                    <span className="text-gray-700 text-sm">Tampilkan satuan</span>
-                                </label>
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={showSizeDetails}
-                                        onChange={(e) => setShowSizeDetails(e.target.checked)}
-                                        className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                    />
-                                    <span className="text-gray-700 text-sm">Tampilkan detail size</span>
-                                </label>
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                                <h3 className="text-sm font-semibold text-gray-700 mb-3">Opsi Tampilan</h3>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                    <label className="flex items-center gap-2 cursor-pointer group">
+                                        <div className="relative">
+                                            <input
+                                                type="checkbox"
+                                                checked={showDiscount}
+                                                onChange={(e) => setShowDiscount(e.target.checked)}
+                                                className="sr-only peer"
+                                            />
+                                            <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                        </div>
+                                        <span className="text-sm text-gray-700 group-hover:text-gray-900">Diskon</span>
+                                    </label>
+                                    
+                                    <label className="flex items-center gap-2 cursor-pointer group">
+                                        <div className="relative">
+                                            <input
+                                                type="checkbox"
+                                                checked={showTax}
+                                                onChange={(e) => setShowTax(e.target.checked)}
+                                                className="sr-only peer"
+                                            />
+                                            <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                        </div>
+                                        <span className="text-sm text-gray-700 group-hover:text-gray-900">Pajak</span>
+                                    </label>
+                                    
+                                    <label className="flex items-center gap-2 cursor-pointer group">
+                                        <div className="relative">
+                                            <input
+                                                type="checkbox"
+                                                checked={showUnit}
+                                                onChange={(e) => setShowUnit(e.target.checked)}
+                                                className="sr-only peer"
+                                            />
+                                            <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                        </div>
+                                        <span className="text-sm text-gray-700 group-hover:text-gray-900">Satuan</span>
+                                    </label>
+                                    
+                                    <label className="flex items-center gap-2 cursor-pointer group">
+                                        <div className="relative">
+                                            <input
+                                                type="checkbox"
+                                                checked={showSizeDetails}
+                                                onChange={(e) => setShowSizeDetails(e.target.checked)}
+                                                className="sr-only peer"
+                                            />
+                                            <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                        </div>
+                                        <span className="text-sm text-gray-700 group-hover:text-gray-900">Detail Size</span>
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
