@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Invoice Modern</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-full-width {
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 20px !important;
+            }
+        }
+        
+        .invoice-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function InvoiceGenerator() {
+            const [invoice, setInvoice] = useState({
+                companyName: 'PT. Nama Perusahaan Anda',
+                companyAddress: 'Jl. Contoh No. 123, Jakarta 12345',
+                companyPhone: '+62 812-3456-7890',
+                companyEmail: 'info@perusahaan.com',
+                invoiceNumber: 'INV-2024-001',
+                invoiceDate: new Date().toISOString().split('T')[0],
+                dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                clientName: 'Nama Klien',
+                clientAddress: 'Alamat Klien',
+                clientPhone: '+62 812-0000-0000',
+                clientEmail: 'klien@email.com',
+                notes: 'Terima kasih atas kepercayaan Anda.',
+                paymentMethod: 'Transfer Bank',
+                bankName: 'Bank Mandiri',
+                accountNumber: '1234567890',
+                accountName: 'PT. Nama Perusahaan Anda'
+            });
+
+            const [items, setItems] = useState([
+                { description: 'Jasa Konsultasi', quantity: 1, unit: 'Paket', price: 5000000 },
+                { description: 'Biaya Layanan', quantity: 2, unit: 'Bulan', price: 2500000 }
+            ]);
+
+            const [tax, setTax] = useState(11); // PPN 11%
+            const [showDiscount, setShowDiscount] = useState(false);
+            const [showTax, setShowTax] = useState(true);
+            const [showUnit, setShowUnit] = useState(true);
+
+            const updateInvoice = (field, value) => {
+                setInvoice({ ...invoice, [field]: value });
+            };
+
+            const updateItem = (index, field, value) => {
+                const newItems = [...items];
+                newItems[index][field] = field === 'description' ? value : parseFloat(value) || 0;
+                setItems(newItems);
+            };
+
+            const addItem = () => {
+                setItems([...items, { description: '', quantity: 1, unit: 'Pcs', price: 0 }]);
+            };
+
+            const removeItem = (index) => {
+                setItems(items.filter((_, i) => i !== index));
+            };
+
+            const calculateSubtotal = () => {
+                return items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+            };
+
+            const calculateTax = () => {
+                return calculateSubtotal() * (tax / 100);
+            };
+
+            const calculateTotal = () => {
+                return calculateSubtotal() + calculateTax();
+            };
+
+            const formatCurrency = (amount) => {
+                return new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
+                }).format(amount);
+            };
+
+            const handlePrint = () => {
+                window.print();
+            };
+
+            const handleDownloadPDF = () => {
+                alert('Untuk download PDF, gunakan Print lalu pilih "Save as PDF" di dialog print.');
+                window.print();
+            };
+
+            return (
+                <div className="min-h-screen p-4 md:p-8">
+                    <div className="mx-auto">
+                        {/* Header */}
+                        <div className="no-print mb-6">
+                            <h1 className="text-3xl font-bold text-gray-800 mb-2">Generator Invoice</h1>
+                            <p className="text-gray-600">Buat invoice profesional dengan mudah</p>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="no-print mb-6 flex flex-wrap gap-3">
+                            <button
+                                onClick={handlePrint}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                            >
+                                🖨️ Print Invoice
+                            </button>
+                            <button
+                                onClick={handleDownloadPDF}
+                                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                            >
+                                📄 Download PDF
+                            </button>
+                            
+                            {/* Toggle Options */}
+                            <div className="flex gap-4 ml-auto items-center">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={showDiscount}
+                                        onChange={(e) => setShowDiscount(e.target.checked)}
+                                        className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    <span className="text-gray-700">Tampilkan diskon</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={showTax}
+                                        onChange={(e) => setShowTax(e.target.checked)}
+                                        className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    <span className="text-gray-700">Tampilkan pajak</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={showUnit}
+                                        onChange={(e) => setShowUnit(e.target.checked)}
+                                        className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    <span className="text-gray-700">Tampilkan satuan</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Form Input */}
+                            <div className="no-print space-y-6">
+                                {/* Company Info */}
+                                <div className="bg-white p-6 rounded-lg invoice-shadow">
+                                    <h2 className="text-xl font-semibold mb-4 text-gray-800">Informasi Perusahaan</h2>
+                                    <div className="space-y-3">
+                                        <input
+                                            type="text"
+                                            placeholder="Nama Perusahaan"
+                                            value={invoice.companyName}
+                                            onChange={(e) => updateInvoice('companyName', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Alamat"
+                                            value={invoice.companyAddress}
+                                            onChange={(e) => updateInvoice('companyAddress', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Telepon"
+                                            value={invoice.companyPhone}
+                                            onChange={(e) => updateInvoice('companyPhone', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                        <input
+                                            type="email"
+                                            placeholder="Email"
+                                            value={invoice.companyEmail}
+                                            onChange={(e) => updateInvoice('companyEmail', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Invoice Details */}
+                                <div className="bg-white p-6 rounded-lg invoice-shadow">
+                                    <h2 className="text-xl font-semibold mb-4 text-gray-800">Detail Invoice</h2>
+                                    <div className="space-y-3">
+                                        <input
+                                            type="text"
+                                            placeholder="Nomor Invoice"
+                                            value={invoice.invoiceNumber}
+                                            onChange={(e) => updateInvoice('invoiceNumber', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                        <div>
+                                            <label className="block text-sm text-gray-600 mb-1">Tanggal Invoice</label>
+                                            <input
+                                                type="date"
+                                                value={invoice.invoiceDate}
+                                                onChange={(e) => updateInvoice('invoiceDate', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm text-gray-600 mb-1">Jatuh Tempo</label>
+                                            <input
+                                                type="date"
+                                                value={invoice.dueDate}
+                                                onChange={(e) => updateInvoice('dueDate', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Client Info */}
+                                <div className="bg-white p-6 rounded-lg invoice-shadow">
+                                    <h2 className="text-xl font-semibold mb-4 text-gray-800">Informasi Klien</h2>
+                                    <div className="space-y-3">
+                                        <input
+                                            type="text"
+                                            placeholder="Nama Klien"
+                                            value={invoice.clientName}
+                                            onChange={(e) => updateInvoice('clientName', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Alamat Klien"
+                                            value={invoice.clientAddress}
+                                            onChange={(e) => updateInvoice('clientAddress', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Telepon"
+                                            value={invoice.clientPhone}
+                                            onChange={(e) => updateInvoice('clientPhone', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                        <input
+                                            type="email"
+                                            placeholder="Email"
+                                            value={invoice.clientEmail}
+                                            onChange={(e) => updateInvoice('clientEmail', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Items */}
+                                <div className="bg-white p-6 rounded-lg invoice-shadow">
+                                    <h2 className="text-xl font-semibold mb-4 text-gray-800">Item</h2>
+                                    <div className="space-y-3">
+                                        {items.map((item, index) => (
+                                            <div key={index} className="flex gap-2 items-start">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Deskripsi"
+                                                    value={item.description}
+                                                    onChange={(e) => updateItem(index, 'description', e.target.value)}
+                                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                                <input
+                                                    type="number"
+                                                    placeholder="Qty"
+                                                    value={item.quantity}
+                                                    onChange={(e) => updateItem(index, 'quantity', e.target.value)}
+                                                    className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                                {showUnit && (
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Satuan"
+                                                        value={item.unit}
+                                                        onChange={(e) => updateItem(index, 'unit', e.target.value)}
+                                                        className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    />
+                                                )}
+                                                <input
+                                                    type="number"
+                                                    placeholder="Harga"
+                                                    value={item.price}
+                                                    onChange={(e) => updateItem(index, 'price', e.target.value)}
+                                                    className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                                <button
+                                                    onClick={() => removeItem(index)}
+                                                    className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <button
+                                        onClick={addItem}
+                                        className="mt-3 w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
+                                    >
+                                        + Tambah Item
+                                    </button>
+                                </div>
+
+                                {/* Tax */}
+                                <div className="bg-white p-6 rounded-lg invoice-shadow">
+                                    <h2 className="text-xl font-semibold mb-4 text-gray-800">Pajak & Pembayaran</h2>
+                                    <div className="space-y-3">
+                                        <div>
+                                            <label className="block text-sm text-gray-600 mb-1">Pajak (%)</label>
+                                            <input
+                                                type="number"
+                                                value={tax}
+                                                onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            placeholder="Metode Pembayaran"
+                                            value={invoice.paymentMethod}
+                                            onChange={(e) => updateInvoice('paymentMethod', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Nama Bank"
+                                            value={invoice.bankName}
+                                            onChange={(e) => updateInvoice('bankName', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Nomor Rekening"
+                                            value={invoice.accountNumber}
+                                            onChange={(e) => updateInvoice('accountNumber', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Nama Pemilik Rekening"
+                                            value={invoice.accountName}
+                                            onChange={(e) => updateInvoice('accountName', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Notes */}
+                                <div className="bg-white p-6 rounded-lg invoice-shadow">
+                                    <h2 className="text-xl font-semibold mb-4 text-gray-800">Catatan</h2>
+                                    <textarea
+                                        placeholder="Catatan tambahan..."
+                                        value={invoice.notes}
+                                        onChange={(e) => updateInvoice('notes', e.target.value)}
+                                        rows="3"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Invoice Preview */}
+                            <div>
+                                <div className="bg-white p-8 rounded-lg invoice-shadow print-full-width">
+                                    {/* Invoice Header */}
+                                    <div className="flex justify-between items-start mb-8">
+                                        <div>
+                                            <h1 className="text-3xl font-bold text-gray-800 mb-2">{invoice.companyName}</h1>
+                                            <p className="text-gray-600 text-sm">{invoice.companyAddress}</p>
+                                            <p className="text-gray-600 text-sm">{invoice.companyPhone}</p>
+                                            <p className="text-gray-600 text-sm">{invoice.companyEmail}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <h2 className="text-2xl font-bold text-blue-600 mb-2">INVOICE</h2>
+                                            <p className="text-gray-600 text-sm">#{invoice.invoiceNumber}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Invoice Details & Client */}
+                                    <div className="grid grid-cols-2 gap-8 mb-8 pb-8 border-b border-gray-200">
+                                        <div>
+                                            <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">Tagihan Kepada</h3>
+                                            <p className="font-semibold text-gray-800">{invoice.clientName}</p>
+                                            <p className="text-gray-600 text-sm">{invoice.clientAddress}</p>
+                                            <p className="text-gray-600 text-sm">{invoice.clientPhone}</p>
+                                            <p className="text-gray-600 text-sm">{invoice.clientEmail}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="mb-3">
+                                                <p className="text-sm text-gray-500">Tanggal Invoice</p>
+                                                <p className="font-semibold text-gray-800">{invoice.invoiceDate}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-500">Jatuh Tempo</p>
+                                                <p className="font-semibold text-gray-800">{invoice.dueDate}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Items Table */}
+                                    <div className="mb-8">
+                                        <table className="w-full">
+                                            <thead>
+                                                <tr className="border-b-2 border-gray-300">
+                                                    <th className="text-left py-3 text-sm font-semibold text-gray-700">Deskripsi</th>
+                                                    <th className="text-center py-3 text-sm font-semibold text-gray-700">Qty</th>
+                                                    {showUnit && <th className="text-center py-3 text-sm font-semibold text-gray-700">Satuan</th>}
+                                                    <th className="text-right py-3 text-sm font-semibold text-gray-700">Harga</th>
+                                                    <th className="text-right py-3 text-sm font-semibold text-gray-700">Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {items.map((item, index) => (
+                                                    <tr key={index} className="border-b border-gray-200">
+                                                        <td className="py-3 text-gray-800">{item.description}</td>
+                                                        <td className="py-3 text-center text-gray-800">{item.quantity}</td>
+                                                        {showUnit && <td className="py-3 text-center text-gray-800">{item.unit}</td>}
+                                                        <td className="py-3 text-right text-gray-800">{formatCurrency(item.price)}</td>
+                                                        <td className="py-3 text-right text-gray-800 font-semibold">{formatCurrency(item.quantity * item.price)}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* Totals */}
+                                    <div className="flex justify-end mb-8">
+                                        <div className="w-64">
+                                            <div className="flex justify-between py-2">
+                                                <span className="text-gray-600">Subtotal</span>
+                                                <span className="text-gray-800 font-semibold">{formatCurrency(calculateSubtotal())}</span>
+                                            </div>
+                                            {showTax && (
+                                                <div className="flex justify-between py-2">
+                                                    <span className="text-gray-600">Pajak ({tax}%)</span>
+                                                    <span className="text-gray-800 font-semibold">{formatCurrency(calculateTax())}</span>
+                                                </div>
+                                            )}
+                                            <div className="flex justify-between py-3 border-t-2 border-gray-300">
+                                                <span className="text-lg font-bold text-gray-800">Total</span>
+                                                <span className="text-lg font-bold text-blue-600">{formatCurrency(showTax ? calculateTotal() : calculateSubtotal())}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Payment Info */}
+                                    <div className="mb-8 p-4 bg-gray-50 rounded-lg">
+                                        <h3 className="text-sm font-semibold text-gray-700 mb-3">Informasi Pembayaran</h3>
+                                        <div className="grid grid-cols-2 gap-4 text-sm">
+                                            <div>
+                                                <p className="text-gray-500">Metode Pembayaran</p>
+                                                <p className="font-semibold text-gray-800">{invoice.paymentMethod}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-gray-500">Bank</p>
+                                                <p className="font-semibold text-gray-800">{invoice.bankName}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-gray-500">Nomor Rekening</p>
+                                                <p className="font-semibold text-gray-800">{invoice.accountNumber}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-gray-500">Atas Nama</p>
+                                                <p className="font-semibold text-gray-800">{invoice.accountName}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Notes */}
+                                    {invoice.notes && (
+                                        <div className="border-t border-gray-200 pt-6">
+                                            <h3 className="text-sm font-semibold text-gray-700 mb-2">Catatan</h3>
+                                            <p className="text-gray-600 text-sm">{invoice.notes}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<InvoiceGenerator />, document.getElementById('root'));
+    </script>
+</body>
+</html>
