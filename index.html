@@ -36,6 +36,7 @@
 
     <script type="text/babel">
         const { useState } = React;
+
         function InvoiceGenerator() {
             const [invoice, setInvoice] = useState({
                 companyName: 'PT. Nama Perusahaan Anda',
@@ -72,7 +73,11 @@
 
             const updateItem = (index, field, value) => {
                 const newItems = [...items];
-                newItems[index][field] = field === 'description' ? value : parseFloat(value) || 0;
+                if (field === 'description' || field === 'unit') {
+                    newItems[index][field] = value;
+                } else {
+                    newItems[index][field] = parseFloat(value) || 0;
+                }
                 setItems(newItems);
             };
 
@@ -115,7 +120,7 @@
 
             return (
                 <div className="min-h-screen p-4 md:p-8">
-                    <div className="mx-auto">
+                    <div className="max-w-6xl mx-auto">
                         {/* Header */}
                         <div className="no-print mb-6">
                             <h1 className="text-3xl font-bold text-gray-800 mb-2">Generator Invoice</h1>
